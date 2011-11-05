@@ -6,6 +6,13 @@ set_include_path(__DIR__ . '/webdata/pixcore/'
 
 Pix_Loader::registerAutoload();
 
+if (file_exists(__DIR__ . '/webdata/setting.php')) {
+    include(__DIR__ . '/webdata/setting.php');
+}
+
+define('MESSAGE_SECRET', getenv('MESSAGE_SECRET'));
+date_default_timezone_set('Asia/Taipei');
+
 /*
 Pix_Cache::addServer('Pix_Cache_Core_Memcache', array(
     'servers' => array(
