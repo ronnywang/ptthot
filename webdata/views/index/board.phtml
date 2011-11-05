@@ -1,0 +1,17 @@
+<?php
+$last = null;
+?>
+<?= $this->partial('/common/header.phtml', $this) ?>
+看版: <?= $this->escape($this->board) ?><br>
+<ol>
+    <?php foreach (RankData::search(array('board' => $this->board))->order(array('time' => 'asc')) as $d) { ?>
+    <li>
+    <?= date('Y/m/d H:i:s', $d->time) ?>. <?= $d->count ?>
+    <?php if (is_null($last) or $d->name != $last) { ?>
+    <?= $this->escape($d->name) ?>
+    <?php } ?>
+    </li>
+    <?php $last = $d->name; ?>
+    <?php } ?>
+</ol>
+<?= $this->partial('/common/footer.phtml', $this) ?>
