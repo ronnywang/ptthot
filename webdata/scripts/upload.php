@@ -1,5 +1,5 @@
+#!/usr/local/bin/php
 <?php
-
 $message = http_get('http://www.ptt.cc/hotboard.html');
 $content = http_parse_message($message)->body;
 $content = iconv('Big5', 'UTF-8//IGNORE', $content);
