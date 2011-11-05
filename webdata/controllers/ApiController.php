@@ -22,7 +22,11 @@ class ApiController extends Pix_Controller
 	    WebBackup::search(array('time' => $time))->update(array('content' => $content));
 	}
 
-	preg_match_all("#人氣：([0-9]*)\n([a-zA-Z0-9]*)\n(.*)#m", strip_tags($content), $matches);
+	$content = preg_replace('#<td[^>]*>#', '', $content);
+	$content = preg_replace('#<a [^>]*>#', '', $content);
+	$content = preg_replace('#</[^>]+>#', '', $content);
+	preg_match_all("#人氣：([0-9]*)\n([^\s]*)\n(.*)#m", ($content), $matches);
+
 	foreach ($matches[0] as $id => $data) {
 	    try {
 		$board = strval($matches[2][$id]);
