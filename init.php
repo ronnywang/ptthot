@@ -13,13 +13,24 @@ if (file_exists(__DIR__ . '/webdata/setting.php')) {
 define('MESSAGE_SECRET', getenv('MESSAGE_SECRET'));
 date_default_timezone_set('Asia/Taipei');
 
-/*
-Pix_Cache::addServer('Pix_Cache_Core_Memcache', array(
-    'servers' => array(
-	array('host' => '127.0.0.1', 'port' => 11211, 'weight' => 10),
-    ),  
-));
-*/
+if (getenv('MEMCACHE_SERVERS')) {
+    $options = array(
+        'host' => getenv('MEMCACHE_SERVERS'),
+        'port' => 11211,
+        'weight' => 10,
+    );
+
+    if (getenv('MEMCACHE_USERNAME')) {
+        $options['user'] = getenv('MEMCACHE_USERNAME');
+        $options['password'] = getenv('MEMCACHE_PASSWORD');
+    }
+    Pix_Cache::addServer('Pix_Cache_Core_MemcacheSASL', array(
+        'servers' => array(
+	    $options,
+        ),  
+    ));
+}
+
 if (getenv('DATABASE_URL')) {
     if (preg_match('#postgres://([^:]*):([^@]*)@([^/]*)/(.*)#', strval(getenv('DATABASE_URL')), $matches)) {
 	$user = $matches[1];
