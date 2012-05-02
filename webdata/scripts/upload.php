@@ -1,6 +1,8 @@
 #!/usr/local/bin/php
 <?php
-$message = http_get('http://www.ptt.cc/hotboard.html');
+if (!$message = @http_get('http://www.ptt.cc/hotboard.html')) {
+    exit;
+}
 $content = http_parse_message($message)->body;
 $content = iconv('Big5', 'UTF-8//IGNORE', $content);
 $content = preg_replace('/([\x{0fffe}-\x{10ffff}]+)/u','' , $content);
