@@ -1,4 +1,4 @@
-#!/usr/bin/php
+#!/usr/local/bin/php
 <?php
 if (!$message = @http_get('http://www.ptt.cc/hotboard.html')) {
     exit;
