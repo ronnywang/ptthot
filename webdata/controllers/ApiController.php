@@ -13,6 +13,7 @@ class ApiController extends Pix_Controller
 	    throw new Exception('找不到時間');
 	}
 
+        /*
 	try {
 	    WebBackup::insert(array(
 		'time' => $time,
@@ -20,7 +21,8 @@ class ApiController extends Pix_Controller
 	    ));
 	} catch (Pix_Table_DuplicateException $e){ 
 	    WebBackup::search(array('time' => $time))->update(array('content' => $content));
-	}
+        }
+         */
 
 	$content = preg_replace('#<td[^>]*>#', '', $content);
 	$content = preg_replace('#<a [^>]*>#', '', $content);
