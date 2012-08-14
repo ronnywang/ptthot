@@ -38,6 +38,12 @@ if (getenv('DATABASE_URL')) {
 	$host = $matches[3];
 	$dbname = $matches[4];
 	Pix_Table::setDefaultDb(new Pix_Table_Db_Adapter_PgSQL(array('user' => $user, 'password' => $pass, 'host' => $host, 'dbname' => $dbname)));
+    } else if (preg_match('#mysql://([^:]*):([^@]*)@([^/]*)/(.*)#', strval(getenv('DATABASE_URL')), $matches)) {
+        $link = new mysqli;
+        $link->connect($matches[3], $matches[1], $matches[2]);
+        $link->select_db($matches[4]);
+        $link->set_charset('utf8');
+        Pix_Table::setDefaultDb(new Pix_Table_Db_Adapter_Mysqli($link));
     }
 }
 
