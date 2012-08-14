@@ -1,0 +1,8 @@
+#
+Options -Indexes
+RewriteEngine On
+RewriteBase /
+
+RewriteRule static/ - [L]
+RewriteRule .* index.php [L]
+

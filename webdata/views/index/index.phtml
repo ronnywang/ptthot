@@ -1,0 +1,13 @@
+<?php
+$latesttime = RankData::search(1)->max('time')->time;
+?>
+<?= $this->partial('/common/header.phtml', $this) ?>
+最新時間: <?= date('Y/m/d H:i:s', $latesttime) ?><br>
+<ol>
+    <?php foreach (RankData::search(array('time' => $latesttime))->order(array('count' => 'desc')) as $data) { ?>
+    <li>
+    <a href="/board/<?= urlencode($data->board) ?>"><?= $this->escape($data->board) ?>. <?= $this->escape($data->name) ?></a> 人氣: <?= intval($data->count) ?>
+    </li>
+    <?php } ?>
+</ol>
+<?= $this->partial('/common/footer.phtml', $this) ?>

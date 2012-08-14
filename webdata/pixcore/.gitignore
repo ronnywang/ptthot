@@ -1,0 +1,5 @@
+fingerprint.txt
+.*.swp
+doc
+tests/debug.php
+php.core
