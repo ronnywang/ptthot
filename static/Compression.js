@@ -9,7 +9,7 @@ function Compression(threshold){
 }
 
 Compression.prototype.getDistance = function(p1,p2){
-	return Math.abs(parseInt(p1) - parseInt(p2));
+	return Math.abs(p1 - p2);
 }
 Compression.prototype.searchParentsAndChilren= function(){
 	if(this.head.length==0)
@@ -22,11 +22,11 @@ Compression.prototype.searchParentsAndChilren= function(){
 		
 		// Search the index of the point with the maximal synchronic distance among the points, whose indexes are in [startIndex, ..., endIndex].
 		var dT = this.data[endIndex][0] - this.data[startIndex][0];
-		var vD = (this.data[endIndex][1] - this.data[startIndex][1])/dT;
+		var vD = (this.data[endIndex][1] - this.data[startIndex][1])/parseFloat(dT);
 		var maxError = 0.0;
 		var maxIndex = -1;
 		for(var i=(startIndex+1) ; i<=(endIndex-1);i++){
-			var tempD = (this.data[i][0] - this.data[startIndex]01])*vD + this.data[startIndex][1];
+			var tempD = (this.data[i][0] - this.data[startIndex][0])*vD + this.data[startIndex][1];
 			var distance = this.getDistance(this.data[i][1],tempD);
 			if(distance >= maxError&& distance>=this.threshold){
 				maxIndex = i;
@@ -53,6 +53,7 @@ Compression.prototype.compress = function(array){
 
 	for(var i=0; i < array.length;i++){
 		this.data.push(array[i]);
+		this.data[this.data.length-1][1] = parseInt(this.data[this.data.length-1][1]);
 	}
 	this.head = new Array();
 	this.foot = new Array();
