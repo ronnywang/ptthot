@@ -13,6 +13,7 @@ foreach (RankData::search(array('board' => $this->board))->order(array('time' =>
 <?= $this->partial('/common/header.phtml', $this) ?>
 <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
 <script type="text/javascript" src="/static/jquery-flot/flot/jquery.flot.js"></script>
+<script type="text/javascript" src="/static/Compression.js"></script>
 
 看版: <?= $this->escape($this->board) ?><br>
 <hr>
@@ -22,8 +23,18 @@ foreach (RankData::search(array('board' => $this->board))->order(array('time' =>
 標題: <span id="subject"></span><br>
 <script type="text/javascript">
 $(function () {
-    var counts = <?= json_encode($counts) ?>;
-    var subjects = <?= json_encode($subjects) ?>;
+	var THRESHOLD = 300;
+	var compressionEngine = new Compression(THRESHOLD);
+    var full_counts = <?= json_encode($counts) ?>;
+    var full_subjects = <?= json_encode($subjects) ?>;
+    var results = compressionEngine.compress(full_counts);
+    var counts = [];
+    var subjects = [];
+    for(var i=0;i<results.length;i++){
+    	counts.push(full_counts[results[i]]);
+    	subjects.push(full_subjects[results[i]]);
+    }
+
     var week_day = {0: '日', 1: '一', 2: '二', 3: '三', 4: '四', 5: '五', 6: '六'};
 
     var get_time = function(v){
