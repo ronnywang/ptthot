@@ -1,6 +1,6 @@
-#!/usr/local/bin/php
+#!/usr/bin/env php
 <?php
-if (!$message = @http_get('http://www.ptt.cc/hotboard.html')) {
+if (!$message = http_get('http://www.ptt.cc/hotboard.html')) {
     exit;
 }
 $content = http_parse_message($message)->body;
