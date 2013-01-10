@@ -42,3 +42,5 @@ foreach ($matches[0] as $id => $data) {
         RankData::search(array('time' => $time, 'board' => $board))->update(array('count' => $count, 'name' => $name));
     }
 }
+
+echo '完成: ' . date('c', $time) . "\n";
