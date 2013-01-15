@@ -10,7 +10,6 @@ if (file_exists(__DIR__ . '/webdata/setting.php')) {
     include(__DIR__ . '/webdata/setting.php');
 }
 
-define('MESSAGE_SECRET', getenv('MESSAGE_SECRET'));
 date_default_timezone_set('Asia/Taipei');
 
 if (!getenv('DATABASE_URL')) {
