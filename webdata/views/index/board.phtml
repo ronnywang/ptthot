@@ -1,13 +1,13 @@
 <?php
 $last = null;
-$subjects = $counts = $changed = array();
-foreach (RankData::search(array('board' => $this->board))->order(array('time' => 'asc')) as $d) { 
-    $counts[] = array($d->time * 1000, $d->count);
-    $subjects[$d->time * 1000] = $d->name;
-    if (is_null($last) or $d->name != $last) { 
-	$changed[$d->time * 1000] = $d->name;
+$subjects = $counts = array();
+
+for ($year = date('Y', RankData::search(array('board' => $this->board))->min('time')->time); $year <= date('Y', RankData::search(array('board' => $this->board))->max('time')->time); $year ++) {
+    foreach (CacheData::getData($this->board, 0, $year) as $data) {
+        list($t, $c, $n) = $data;
+        $counts[] = array($t * 1000, $c);
+        $subjects[$t * 1000] = $n;
     }
-    $last = $d->name;
 }
 ?>
 <?= $this->partial('/common/header.phtml', $this) ?>
