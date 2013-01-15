@@ -1,4 +1,6 @@
 <?php
+error_reporting(E_ALL ^ E_STRICT ^ E_NOTICE);
+
 require(__DIR__ . '/webdata/pixcore/Pix/Loader.php');
 set_include_path(__DIR__ . '/webdata/pixcore/'
     . PATH_SEPARATOR . __DIR__ . '/webdata/models'
