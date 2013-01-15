@@ -485,7 +485,8 @@ abstract class Pix_Table
         if (!Pix_Setting::get('Table:DropTableEnable')) {
             throw new Pix_Table_Exception("要 DROP TABLE 前請加上 Pix_Setting::set('Table:DropTableEnable', true);");
         }
-	$table = self::getTable();
+        $table = self::getTable();
+        $table->_cache_rows = array();
 	return $table->getDb()->dropTable($table);
     }
 
@@ -502,10 +503,10 @@ abstract class Pix_Table
 	$table = self::getTable();
 	$conf = array();
 	$conf['tableClass'] = $table->getClass();
-	$conf['where'] = $where;
 
 	$resultSetClass = $table->_resultSetClass;
-	return new $resultSetClass($conf);
+        $resultset = new $resultSetClass($conf);
+        return $resultset->search($where);
     }
 	
     public $_cache_rows = array();
@@ -1061,21 +1062,26 @@ abstract class Pix_Table
      * @access public
      * @return Pix_Table
      */
-    public static function newEmptyTable()
+    public static function newEmptyTable($table_name = null)
     {
-        while (true) {
-            $unique_class_name = 'Pix_Table_EmptyTable_' . crc32(uniqid());
-            if (!class_exists($unique_class_name)) {
-                break;
+        if (is_null($table_name)) {
+            while (true) {
+                $table_name = 'Pix_Table_EmptyTable_' . crc32(uniqid());
+                if (!class_exists($table_name)) {
+                    break;
+                }
             }
+        }
+
+        if (class_exists($table_name)) {
+            throw new Pix_Table_Exception("newEmptyTable failed, {$table_name} is existed.");
         }
 
         // XXX: In Pix Table, a Table is mapping to a PHP class. If you want dynamically new a table,
         // you must declare a new Pix_Table class.
         // class_alias doesn't worked here.
-        eval("class {$unique_class_name} extends Pix_Table {}");
-        return Pix_Table::getTable($unique_class_name);
-
+        eval("class {$table_name} extends Pix_Table {}");
+        return Pix_Table::getTable($table_name);
     }
 
     /**

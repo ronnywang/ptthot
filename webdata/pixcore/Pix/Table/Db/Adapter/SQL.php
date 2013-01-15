@@ -49,7 +49,7 @@ class Pix_Table_Db_Adapter_SQL extends Pix_Table_Db_Adapter_Abstract
     {
         $sql = "SELECT COUNT(*) AS " . $this->column_quote('count') . " FROM " . $this->column_quote($table->getTableName());
         $sql .= ' WHERE ';
-        $sql .= $this->_get_where_clause($search);
+        $sql .= $this->_get_where_clause($search, $table);
 
         $res = $this->query($sql);
         $row = $res->fetch_assoc();
@@ -70,7 +70,7 @@ class Pix_Table_Db_Adapter_SQL extends Pix_Table_Db_Adapter_Abstract
     {
         $sql = "SELECT SUM(" . $this->column_quote($column) . ") AS " . $this->column_quote('sum') . " FROM " . $this->column_quote($table->getTableName());
         $sql .= ' WHERE ';
-        $sql .= $this->_get_where_clause($search);
+        $sql .= $this->_get_where_clause($search, $table);
 
 	$res = $this->query($sql);
         $row = $res->fetch_assoc();
@@ -95,7 +95,7 @@ class Pix_Table_Db_Adapter_SQL extends Pix_Table_Db_Adapter_Abstract
 
         $sql = 'SELECT ' . $select_columns . ' FROM ' . $this->column_quote($table->getTableName());
 	$sql .= ' WHERE ';
-        $sql .= $this->_get_where_clause($search);
+        $sql .= $this->_get_where_clause($search, $table);
         $sql .= $this->_get_clause($search);
 
 	$res = $this->query($sql);
@@ -120,7 +120,7 @@ class Pix_Table_Db_Adapter_SQL extends Pix_Table_Db_Adapter_Abstract
         $table = $row->getTable();
         $sql = 'DELETE FROM ' . $this->column_quote($table->getTableName());
         $sql .= ' WHERE ';
-        $sql .= $this->_get_where_clause(Pix_Table_Search::factory(array_combine($table->getPrimaryColumns(), $row->getPrimaryValues()), $table));
+        $sql .= $this->_get_where_clause(Pix_Table_Search::factory(array_combine($table->getPrimaryColumns(), $row->getPrimaryValues())), $table);
 
         $this->query($sql);
     }
@@ -139,7 +139,7 @@ class Pix_Table_Db_Adapter_SQL extends Pix_Table_Db_Adapter_Abstract
         $sql = 'UPDATE ' . $this->column_quote($table->getTableName());
         $sql .= ' SET ' . $this->_get_set_clause($data, $table);
         $sql .= ' WHERE ';
-        $sql .= $this->_get_where_clause(Pix_Table_Search::factory(array_combine($table->getPrimaryColumns(), $row->getPrimaryValues()), $table));
+        $sql .= $this->_get_where_clause(Pix_Table_Search::factory(array_combine($table->getPrimaryColumns(), $row->getPrimaryValues())), $table);
 
 	return $this->query($sql);
     }
@@ -197,10 +197,9 @@ class Pix_Table_Db_Adapter_SQL extends Pix_Table_Db_Adapter_Abstract
      * @access protected
      * @return string
      */
-    protected function _get_where_clause($search)
+    protected function _get_where_clause($search, $table)
     {
         $terms = array();
-        $table = $search->getTable();
         foreach ($search->getSearchCondictions() as $condiction) {
             switch ($condiction[0]) {
             case 'map':
@@ -219,9 +218,12 @@ class Pix_Table_Db_Adapter_SQL extends Pix_Table_Db_Adapter_Abstract
             if (!is_array($orders)) {
                 throw new Pix_Table_Exception("指定的 ORDER 無法使用 after 或是 before");
             }
-            if (!$row = $search->after()) {
+            if ($row = $search->after()) {
+                $is_include = $search->afterInclude();
                 // 如果指定 before 的話，順序要調過來
+            } else {
                 $row = $search->before();
+                $is_include = $search->beforeInclude();
                 $orders = Pix_Table_Search::reverseOrder($orders);
             }
 
@@ -236,6 +238,14 @@ class Pix_Table_Db_Adapter_SQL extends Pix_Table_Db_Adapter_Abstract
                 $and_terms[] = $this->column_quote($order) . ('asc' == $way ? '>' : '<') . " " . $this->quoteWithColumn($table, $row->{$order}, $order);
 		$or_terms[] = '(' . implode(' AND ', $and_terms) . ')';
 		$equal_orders[] = $order;
+            }
+
+            if ($is_include) {
+                $and_terms = array();
+                foreach ($equal_orders as $equal_order) {
+                    $and_terms[] = $this->column_quote($equal_order) . ' = ' . $this->quoteWithColumn($table, $row->{$equal_order}, $equal_order);
+                }
+                $or_terms[] = '(' . implode(' AND ', $and_terms) . ')';
             }
             $terms[] = '(' . implode(' OR ', $or_terms) . ')';
 	}

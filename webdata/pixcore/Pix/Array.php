@@ -116,42 +116,6 @@ abstract class Pix_Array implements Countable, SeekableIterator, ArrayAccess
 	return $this->limit($per_page)->offset(($page - 1) * $per_page)->order($order);
     }
 
-    static function toOrderArray($order)
-    {
-        $resultorder = array();
-        if (is_array($order)) {
-            foreach ($order as $column => $way) {
-                if (is_int($column)) {
-                    $resultorder[$way] = 'asc';
-                    continue;
-                }
-
-                $resultorder[$column] = strtolower($way);
-                if (!in_array(strtolower($way), array('asc', 'desc'))) {
-                    $resultorder[$column] = 'asc';
-                    continue;
-                }
-            }
-        }
-
-        if (is_scalar($order)) {
-            $orders = explode(',', $order);
-            $resultorder = array();
-            foreach ($orders as $ord) {
-                if (preg_match('#^`?([^` ]*)`?( .*)?$#', trim($ord), $ret)) {
-                    $way = strtolower(trim($ret[2]));
-                    $resultorder[$ret[1]] = $way;
-                    if (!in_array($way, array('asc', 'desc'))) {
-                        $resultorder[$ret[1]] = 'asc';
-                    }
-                } else {
-                    throw new Pix_Array_Exception('->order($order) 的格式無法判斷');
-                }
-            }
-        }
-        return $resultorder;
-    }
-
     public function filter($filter, $options = array())
     {
         $obj = clone $this;
@@ -171,8 +135,35 @@ abstract class Pix_Array implements Countable, SeekableIterator, ArrayAccess
         $this->_filters[] = array($filter, $options);
     }
 
+    protected $_after;
+    protected $_after_included = false;
+
+    public function after()
+    {
+        $args = func_get_args();
+        if (!count($args)) {
+            return $this->_after;
+        }
+        $rs = clone $this;
+        $rs->_after = $args[0];
+        $rs->_after_included = array_key_exists(1, $args) ? $args[1] : false;
+        return $rs;
+    }
+
     protected function filterRow()
     {
+        if ($this->_after) {
+            $compare = $this->_sort($this->current(), $this->_after);
+
+            if ($compare < 0) {
+                return false;
+            }
+
+            if ($compare == 0 and !$this->_after_included) {
+                return false;
+            }
+        }
+
         if (count($this->_filters)) {
             foreach ($this->_filters as $filter) {
                 list($callback, $options) = $filter;
