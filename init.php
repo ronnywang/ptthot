@@ -23,11 +23,14 @@ if (preg_match('#postgres://([^:]*):([^@]*)@([^/]*)/(.*)#', strval(getenv('DATAB
     $dbname = $matches[4];
     Pix_Table::setDefaultDb(new Pix_Table_Db_Adapter_PgSQL(array('user' => $user, 'password' => $pass, 'host' => $host, 'dbname' => $dbname)));
 } else if (preg_match('#mysql://([^:]*):([^@]*)@([^/]*)/(.*)#', strval(getenv('DATABASE_URL')), $matches)) {
-    $link = new mysqli;
-    $link->connect($matches[3], $matches[1], $matches[2]);
-    $link->select_db($matches[4]);
-    $link->set_charset('utf8');
-    Pix_Table::setDefaultDb(new Pix_Table_Db_Adapter_Mysqli($link));
+    $db = new StdClass;
+    $db->host = $matches[3];
+    $db->username = $matches[1];
+    $db->password = $matches[2];
+    $db->dbname = $matches[4];
+    $config = new StdClass;
+    $config->master = $config->slave = $db;
+    Pix_Table::setDefaultDb(new Pix_Table_Db_Adapter_MysqlConf(array($config)));
 }
 
 Pix_Controller::addCommonHelpers();
