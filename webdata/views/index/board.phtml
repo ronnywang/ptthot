@@ -29,7 +29,7 @@ $(function () {
     var get_time = function(v){
 	var d = new Date();
 	d.setTime(v);
-	return (d.getMonth() + 1) + "/" + d.getDate() + '(' + week_day[d.getDay()] + ')' + d.getHours() + ':' + d.getMinutes();
+	return d.getUTCFullYear() + '/' + (d.getMonth() + 1) + "/" + d.getDate() + '(' + week_day[d.getDay()] + ')' + d.getHours() + ':' + d.getMinutes();
     };
 
 
