@@ -37,4 +37,4 @@ if (preg_match('#postgres://([^:]*):([^@]*)@([^/]*)/(.*)#', strval(getenv('DATAB
 }
 
 Pix_Controller::addCommonHelpers();
-
+Pix_Table::addStaticResultSetHelper('Pix_Array_Volume');
