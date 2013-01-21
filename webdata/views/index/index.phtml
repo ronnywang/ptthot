@@ -6,7 +6,7 @@ $latesttime = RankData::search(1)->max('time')->time;
 <ol>
     <?php foreach (RankData::search(array('time' => $latesttime))->order(array('count' => 'desc')) as $data) { ?>
     <li>
-    <a href="/board/<?= urlencode($data->board) ?>"><?= $this->escape($data->board) ?>. <?= $this->escape($data->name) ?></a> 人氣: <?= intval($data->count) ?>
+    <a href="/board/<?= urlencode($data->board) ?>"><?= $this->escape($data->board) ?>. <?= $this->escape(TitleHistory::getLatestTitle($data->board)->title) ?></a> 人氣: <?= intval($data->count) ?>
     </li>
     <?php } ?>
 </ol>
