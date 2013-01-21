@@ -73,7 +73,10 @@ class Curl extends ConsumerAbstract
         // Get the default options array
         $options = $this->defaultOptions;
         $options[CURLOPT_CAINFO] = dirname(__FILE__) . '/ca-bundle.pem';
-        
+
+        if (getenv('PROXY')) {
+            $options[CURLOPT_PROXY] = getenv('PROXY');
+        }
         if ($method == 'GET' && $this->outFile) { // GET
             $options[CURLOPT_RETURNTRANSFER] = false;
             $options[CURLOPT_HEADER] = false;
