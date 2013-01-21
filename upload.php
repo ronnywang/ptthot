@@ -36,8 +36,8 @@ foreach ($matches[0] as $id => $data) {
             'time' => $time,
             'board' => $board,
             'count' => $count,
-            'name' => $name,
         ));
+        TitleHistory::updateTitle($board, $time, $name);
     } catch (Pix_Table_DuplicateException $e) {
         RankData::search(array('time' => $time, 'board' => $board))->update(array('count' => $count, 'name' => $name));
     }
