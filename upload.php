@@ -37,10 +37,10 @@ foreach ($matches[0] as $id => $data) {
             'board' => $board,
             'count' => $count,
         ));
-        TitleHistory::updateTitle($board, $time, $name);
     } catch (Pix_Table_DuplicateException $e) {
-        RankData::search(array('time' => $time, 'board' => $board))->update(array('count' => $count, 'name' => $name));
+        RankData::search(array('time' => $time, 'board' => $board))->update(array('count' => $count));
     }
+    TitleHistory::updateTitle($board, $time, $name);
 }
 
 echo '完成: ' . date('c', $time) . "\n";
