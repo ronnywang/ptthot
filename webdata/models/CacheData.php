@@ -46,7 +46,7 @@ class CacheData extends Pix_Table
                 if (!$max_data) {
                     continue;
                 }
-                $datas[] = array($max_data->time, $max_data->count, $max_data->name);
+                $datas[] = array($max_data->time, $max_data->count);
             }
         }
 
