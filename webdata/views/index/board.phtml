@@ -6,7 +6,9 @@ for ($year = date('Y', RankData::search(array('board' => $this->board))->min('ti
     foreach (CacheData::getData($this->board, 0, $year) as $data) {
         list($t, $c, $n) = $data;
         $counts[] = array($t * 1000, $c);
-        $subjects[$t * 1000] = $n;
+    }
+    foreach (TitleHistory::search(array('board' => $this->board))->search("`time` >= " . mktime(0, 0, 0, 1, 1, $year) . ' AND `time` < ' . mktime(0, 0, 0, 1, 1, $year + 1))->order("time ASC") as $titlehistory) {
+        $subjects[] = array(intval($titlehistory->time), $titlehistory->title);
     }
 }
 ?>
@@ -23,7 +25,6 @@ for ($year = date('Y', RankData::search(array('board' => $this->board))->min('ti
 <script type="text/javascript">
 $(function () {
     var counts = <?= json_encode($counts) ?>;
-    var subjects = <?= json_encode($subjects) ?>;
     var week_day = {0: '日', 1: '一', 2: '二', 3: '三', 4: '四', 5: '五', 6: '六'};
 
     var get_time = function(v){
@@ -44,15 +45,23 @@ $(function () {
     $("#placeholder").bind("plothover", function (event, pos, item) {
 	if (item) {
 	    $('#time').text(get_time(item.datapoint[0].toFixed()));
-	    $('#count').text(item.datapoint[1].toFixed());
-	    if (subjects[item.datapoint[0].toFixed()]) {
-		$('#subject').text(subjects[item.datapoint[0].toFixed()]);
-	    }
+            $('#count').text(item.datapoint[1].toFixed());
+            $('#title-history li').each(function(){
+                if (parseInt($(this).attr('data-timestamp'), 10) * 1000 >= item.datapoint[0].toFixed()) {
+                    $('#subject').text($(this).attr('data-title'));
+                    return false;
+                }
+            });
 	}
     });
 
 });
 </script>
-<ol>
-</ol>
+<h2>標題記錄</h2>
+<ul id="title-history">
+    <?php foreach ($subjects as $time_title) { ?>
+    <?php list($time, $title) = $time_title; ?>
+    <li data-title="<?= $this->escape($title) ?>" data-timestamp="<?= $time ?>"><?= date('Y/m/d H:i:s', $time) ?>: <?= $this->escape($title) ?></li>
+    <?php } ?>
+</ul>
 <?= $this->partial('/common/footer.phtml', $this) ?>
