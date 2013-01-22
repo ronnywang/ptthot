@@ -10,8 +10,8 @@ class IndexController extends Pix_Controller
     {
 	list(, /*board*/, $board) = explode('/', $this->getURI());
 
-	if (!RankData::search(array('board' => $board))->first()) {
-	    throw new Exception('404');
+        if (!RankData::search(array('board' => $board))->first()) {
+            return $this->redirect('/');
 	}
 	$this->view->board = $board;
     }
