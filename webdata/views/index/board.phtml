@@ -7,8 +7,8 @@ for ($year = date('Y', RankData::search(array('board' => $this->board))->min('ti
         list($t, $c, $n) = $data;
         $counts[] = array($t * 1000, $c);
     }
-    foreach (TitleHistory::search(array('board' => $this->board))->search("`time` >= " . mktime(0, 0, 0, 1, 1, $year) . ' AND `time` < ' . mktime(0, 0, 0, 1, 1, $year + 1))->order("time ASC") as $titlehistory) {
-        $subjects[] = array(intval($titlehistory->time), $titlehistory->title);
+    foreach (TitleHistory::search(array('board' => $this->board))->search("`time` >= " . mktime(0, 0, 0, 1, 1, $year) . ' AND `time` < ' . mktime(0, 0, 0, 1, 1, $year + 1))->order("time ASC")->toArray(array('time', 'title')) as $titlehistory) {
+        $subjects[] = array(intval($titlehistory['time']), $titlehistory['title']);
     }
 }
 $this->title = $this->board . ' @ ';
