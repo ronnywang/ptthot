@@ -26,6 +26,8 @@ $content = preg_replace('#<a [^>]*>#', '', $content);
 $content = preg_replace('#</[^>]+>#', '', $content);
 preg_match_all("#人氣：([0-9]*)\n([^\s]*)\n(.*)#m", ($content), $matches);
 
+$latest_data = array();
+
 foreach ($matches[0] as $id => $data) {
     try {
         $board = strval($matches[2][$id]);
@@ -40,7 +42,10 @@ foreach ($matches[0] as $id => $data) {
     } catch (Pix_Table_DuplicateException $e) {
         RankData::search(array('time' => $time, 'board' => $board))->update(array('count' => $count));
     }
+
+    $latest_data[] = array($board, $count, $name);
     TitleHistory::updateTitle($board, $time, $name);
 }
+KeyValue::set('latest_hot', json_encode(array('time' => $time, 'boards' => $latest_data)));
 
 echo '完成: ' . date('c', $time) . "\n";
