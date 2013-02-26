@@ -15,4 +15,9 @@ class IndexController extends Pix_Controller
 	}
 	$this->view->board = $board;
     }
+
+    public function searchAction()
+    {
+        return $this->redirect('/board/' . urlencode($_GET['q']));
+    }
 }
