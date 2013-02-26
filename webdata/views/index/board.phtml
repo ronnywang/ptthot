@@ -24,7 +24,7 @@ $this->title = $this->board . ' @ ';
     js.src = "//connect.facebook.net/zh_TW/all.js#xfbml=1";
       fjs.parentNode.insertBefore(js, fjs);
       }(document, 'script', 'facebook-jssdk'));</script>
-<div class="span6">
+<div class="span6" style="min-width: 768px">
 看版: <?= $this->escape($this->board) ?><br>
 <hr>
 <div id="placeholder" style="width:100%;height:300px;"></div>
