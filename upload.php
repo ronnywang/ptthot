@@ -6,7 +6,6 @@ include(__DIR__ . '/init.php');
 $curl = curl_init();
 curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1); 
 curl_setopt($curl, CURLOPT_URL, 'http://www.ptt.cc/hotboard.html');
-curl_setopt($curl, CURLOPT_PROXY, 'proxy.hisoku.ronny.tw:80');
 if (!$content = curl_exec($curl)) {
     exit;
 }
