@@ -13,6 +13,11 @@ if (file_exists(__DIR__ . '/webdata/setting.php')) {
     include(__DIR__ . '/webdata/setting.php');
 }
 
+if ($_SERVER['HTTP_HOST'] != 'ptthot.ronny.tw') {
+    header('Location: http://ptthot.ronny.tw' . $_SERVER['REQUEST_URI'], true, 301);
+    exit;
+}
+
 date_default_timezone_set('Asia/Taipei');
 
 if (!getenv('DATABASE_URL')) {
