@@ -2,6 +2,7 @@
 <?php
 
 include(__DIR__ . '/init.php');
+include(__DIR__ . '/Big52003.php');
 
 $curl = curl_init();
 curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1); 
@@ -10,14 +11,14 @@ if (!$content = curl_exec($curl)) {
     exit;
 }
 
-$content = iconv('Big5', 'UTF-8//IGNORE', $content);
+$content = Big52003::iconv($content);
 $content = preg_replace('/([\x{0fffe}-\x{10ffff}]+)/u','' , $content);
 
 if (!preg_match('#\(本文約每小時更新，最後更新時間 ([^)]*)#', $content, $matches)) {
     throw new Exception('找不到時間');
 }
 if (!$time = strtotime($matches[1])) {
-    throw new Exception('找不到時間');
+    throw new Exception('找不到時間: ' . $matches[1]);
 }
 
 $content = preg_replace('#<td[^>]*>#', '', $content);
