@@ -6,7 +6,7 @@ include(__DIR__ . '/Big52003.php');
 
 $curl = curl_init();
 curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1); 
-curl_setopt($curl, CURLOPT_URL, 'http://www.ptt.cc/hotboard.html');
+curl_setopt($curl, CURLOPT_URL, 'https://www.ptt.cc/hotboard.html');
 if (!$content = curl_exec($curl)) {
     exit;
 }
