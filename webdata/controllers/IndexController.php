@@ -8,12 +8,12 @@ class IndexController extends Pix_Controller
 
     public function boardAction()
     {
-	list(, /*board*/, $board) = explode('/', $this->getURI());
+        list(, /*board*/, $board) = explode('/', $this->getURI());
 
         if (!RankData::search(array('board' => $board))->first()) {
             return $this->redirect('/');
-	}
-	$this->view->board = $board;
+        }
+        $this->view->board = $board;
     }
 
     public function searchAction()
