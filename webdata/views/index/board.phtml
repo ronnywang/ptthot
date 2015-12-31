@@ -6,6 +6,9 @@ if ($this->from and $this->to) {
     foreach (RankData::search(array('board' => $this->board))->search("{$this->from} < time AND time < {$this->to}")->order('time ASC') as $rd) {
         $counts[] = array($rd->time * 1000, $rd->count);
     }
+    foreach (TitleHistory::search(array('board' => $this->board))->search("{$this->from} < time AND time < {$this->to}")->order('time ASC') as $th) {
+        $subjects[] = array($th->time, $th->title);
+    }
 } else {
     for ($year = date('Y', RankData::search(array('board' => $this->board))->min('time')->time); $year <= date('Y', RankData::search(array('board' => $this->board))->max('time')->time); $year ++) {
         foreach (CacheData::getData($this->board, 0, $year) as $data) {
