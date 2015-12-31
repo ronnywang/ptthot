@@ -2,13 +2,19 @@
 $last = null;
 $subjects = $counts = array();
 
-for ($year = date('Y', RankData::search(array('board' => $this->board))->min('time')->time); $year <= date('Y', RankData::search(array('board' => $this->board))->max('time')->time); $year ++) {
-    foreach (CacheData::getData($this->board, 0, $year) as $data) {
-        list($t, $c, $n) = $data;
-        $counts[] = array($t * 1000, $c);
+if ($this->from and $this->to) {
+    foreach (RankData::search(array('board' => $this->board))->search("{$this->from} < time AND time < {$this->to}")->order('time ASC') as $rd) {
+        $counts[] = array($rd->time * 1000, $rd->count);
     }
-    foreach (TitleHistory::search(array('board' => $this->board))->search("`time` >= " . mktime(0, 0, 0, 1, 1, $year) . ' AND `time` < ' . mktime(0, 0, 0, 1, 1, $year + 1))->order("time ASC")->toArray(array('time', 'title')) as $titlehistory) {
-        $subjects[] = array(intval($titlehistory['time']), $titlehistory['title']);
+} else {
+    for ($year = date('Y', RankData::search(array('board' => $this->board))->min('time')->time); $year <= date('Y', RankData::search(array('board' => $this->board))->max('time')->time); $year ++) {
+        foreach (CacheData::getData($this->board, 0, $year) as $data) {
+            list($t, $c, $n) = $data;
+            $counts[] = array($t * 1000, $c);
+        }
+        foreach (TitleHistory::search(array('board' => $this->board))->search("`time` >= " . mktime(0, 0, 0, 1, 1, $year) . ' AND `time` < ' . mktime(0, 0, 0, 1, 1, $year + 1))->order("time ASC")->toArray(array('time', 'title')) as $titlehistory) {
+            $subjects[] = array(intval($titlehistory['time']), $titlehistory['title']);
+        }
     }
 }
 $this->title = $this->board . ' @ ';
@@ -80,7 +86,7 @@ google_ad_height = 90;
 //-->
 </script>
 <script type="text/javascript"
-src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
+src="//pagead2.googlesyndication.com/pagead/show_ads.js">
 </script>
 <div class="fb-comments" data-href="http://ptthot.ronny.tw/board/<?= $this->board ?>" data-width="470" data-num-posts="2"></div>
 </div>

@@ -14,6 +14,8 @@ class IndexController extends Pix_Controller
             return $this->redirect('/');
         }
         $this->view->board = $board;
+        $this->view->from = $_GET['from'] ? strtotime($_GET['from']) : 0;
+        $this->view->to = $_GET['to'] ? strtotime($_GET['to']) : 0;
     }
 
     public function searchAction()
