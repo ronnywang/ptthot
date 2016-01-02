@@ -4,7 +4,7 @@ $subjects = $counts = array();
 
 if ($this->from and $this->to) {
     foreach (RankData::search(array('board' => $this->board))->search("{$this->from} < time AND time < {$this->to}")->order('time ASC') as $rd) {
-        $counts[] = array($rd->time * 1000, $rd->count);
+        $counts[] = array($rd->time * 1000, intval($rd->count));
     }
     foreach (TitleHistory::search(array('board' => $this->board))->search("{$this->from} < time AND time < {$this->to}")->order('time ASC') as $th) {
         $subjects[] = array($th->time, $th->title);
@@ -13,7 +13,7 @@ if ($this->from and $this->to) {
     for ($year = date('Y', RankData::search(array('board' => $this->board))->min('time')->time); $year <= date('Y', RankData::search(array('board' => $this->board))->max('time')->time); $year ++) {
         foreach (CacheData::getData($this->board, 0, $year) as $data) {
             list($t, $c, $n) = $data;
-            $counts[] = array($t * 1000, $c);
+            $counts[] = array($t * 1000, intval($c));
         }
         foreach (TitleHistory::search(array('board' => $this->board))->search("`time` >= " . mktime(0, 0, 0, 1, 1, $year) . ' AND `time` < ' . mktime(0, 0, 0, 1, 1, $year + 1))->order("time ASC")->toArray(array('time', 'title')) as $titlehistory) {
             $subjects[] = array(intval($titlehistory['time']), $titlehistory['title']);
@@ -23,8 +23,27 @@ if ($this->from and $this->to) {
 $this->title = $this->board . ' @ ';
 ?>
 <?= $this->partial('/common/header.phtml', $this) ?>
+<style>
+.axis path,
+.axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+
+.x.axis path {
+  display: none;
+}
+
+.line {
+  fill: none;
+  stroke: steelblue;
+  stroke-width: 1.5px;
+}
+
+</style>
 <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
-<script type="text/javascript" src="/static/jquery-flot/flot/jquery.flot.js"></script>
+<script src="//d3js.org/d3.v3.min.js"></script>
 <div id="fb-root"></div>
 <script>(function(d, s, id) {
   var js, fjs = d.getElementsByTagName(s)[0];
@@ -41,44 +60,94 @@ $this->title = $this->board . ' @ ';
 人氣: <span id="count"></span><br>
 標題: <span id="subject"></span><br>
 <script type="text/javascript">
-$(function () {
-    var counts = <?= json_encode($counts) ?>;
-    var week_day = {0: '日', 1: '一', 2: '二', 3: '三', 4: '四', 5: '五', 6: '六'};
+var week_day = {0: '日', 1: '一', 2: '二', 3: '三', 4: '四', 5: '五', 6: '六'};
 
-    var get_time = function(v){
-	var d = new Date();
-	d.setTime(v);
-	return d.getUTCFullYear() + '/' + (d.getMonth() + 1) + "/" + d.getDate() + '(' + week_day[d.getDay()] + ')' + d.getHours() + ':' + d.getMinutes();
-    };
+var margin = {top: 20, right: 20, bottom: 30, left: 50},
+    width = 800 - margin.left - margin.right,
+    height = 300 - margin.top - margin.bottom;
 
+var x = d3.time.scale()
+    .range([0, width]);
 
-    var draw_plot = function(){
-    $.plot($("#placeholder"), [ counts ], {
-	grid: { hoverable: true },
-	xaxis: { mode: 'time', tickFormatter: function (v, axis) {
-	    var ret = get_time(v);
-	    return ret;
-	}}
-    });
-    };
+var y = d3.scale.linear()
+    .range([height, 0]);
 
-    $(draw_plot);
-    $(window).resize(draw_plot);
+var xAxis = d3.svg.axis()
+    .scale(x)
+    .orient("bottom");
 
-    $("#placeholder").bind("plothover", function (event, pos, item) {
-	if (item) {
-	    $('#time').text(get_time(item.datapoint[0].toFixed()));
-            $('#count').text(item.datapoint[1].toFixed());
-            $('#title-history li').each(function(){
-                if (parseInt($(this).attr('data-timestamp'), 10) * 1000 >= item.datapoint[0].toFixed()) {
-                    $('#subject').text($(this).attr('data-title'));
-                    return false;
-                }
-            });
-	}
-    });
+var yAxis = d3.svg.axis()
+    .scale(y)
+    .orient("left");
 
-});
+var line = d3.svg.line()
+    .x(function(d) { return x(d[0]); })
+    .y(function(d) { return y(d[1]); });
+
+var svg = d3.select("#placeholder").append("svg")
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+  .append("g")
+    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+data = <?= json_encode($counts) ?>;
+  x.domain(d3.extent(data, function(d) { return d[0]; }));
+  y.domain(d3.extent(data, function(d) { return d[1]; }));
+
+  svg.append("g")
+      .attr("class", "x axis")
+      .attr("transform", "translate(0," + height + ")")
+      .call(xAxis);
+
+  svg.append("g")
+      .attr("class", "y axis")
+      .call(yAxis)
+    .append("text")
+      .attr("transform", "rotate(-90)")
+      .attr("y", 6)
+      .attr("dy", ".71em")
+      .style("text-anchor", "end")
+      .text("人氣");
+
+  var get_time = function(t){
+      d = new Date;
+      d.setTime(t);
+      return d.getUTCFullYear() + '/' + (d.getMonth() + 1) + "/" + d.getDate() + '(' + week_day[d.getDay()] + ')' + d.getHours() + ':' + d.getMinutes();
+  };
+
+    bisectDate = d3.bisector(function(d) { return d[0]; }).left,
+
+  svg.append("path")
+      .datum(data)
+      .attr("class", "line")
+      .attr("d", line)
+      .on('mousemove', function(d, i){
+          var d = x.invert(d3.mouse(this)[0]);
+          var mouse_value = y.invert(d3.mouse(this)[1]);
+          var c = bisectDate(data, d, 1);
+          var min_count = c;
+          for (var i = c - 3; i < c + 3; i ++) {
+              if (Math.abs(mouse_value - data[i][1]) < Math.abs(data[min_count][1] - mouse_value)) {
+                  min_count = i;
+                  $('#count').text(data[i][1]);
+                  d = data[i][0];
+                  $('#time').text(get_time(data[i][0]));
+              }
+          }
+          $('#title-history li').each(function(){
+              if (parseInt($(this).attr('data-timestamp'), 10) * 1000 >= d) {
+                  $('#subject').text($(this).attr('data-title'));
+                  return false;
+                  }
+          });
+      })
+          ;
+
+function type(d) {
+  d[0] = new Date(d[0]);
+  return d;
+}
+
 </script>
 <script type="text/javascript"><!--
 google_ad_client = "ca-pub-3389357009051920";
