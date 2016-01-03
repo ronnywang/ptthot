@@ -11,7 +11,7 @@ class KeyValue extends Pix_Table
         $this->_columns['value'] = array('type' => 'text');
     }
 
-    public function set($key, $value)
+    public static function set($key, $value)
     {
         try {
             KeyValue::insert(array(
@@ -23,7 +23,7 @@ class KeyValue extends Pix_Table
         }
     }
 
-    public function get($key)
+    public static function get($key)
     {
         return KeyValue::find($key)->value;
     }
