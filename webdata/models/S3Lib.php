@@ -40,7 +40,6 @@ class S3Lib
             throw new Exception('error');
         }
 
-        $body = '<html><body>';
         $total_size = 0;
         $all_last_modified = 0;
         
@@ -54,6 +53,7 @@ class S3Lib
 
             $table_tr[] = "<tr><td><a href=\"" . htmlspecialchars($file->Key) . "\">" . htmlspecialchars($file->Key) . "</a></td><td>" . date('Y/m/d H:i:s', $last_modified) . "</td><td>{$file->Size}</td></tr>";
         }
+        $body = '<html><html><meta http-equiv="last-modified" content="' . date('Y-m-d@H:i:s O', $all_last_modified) . '"><body>';
         $body .= "Last Modified: " . date('Y/m/d H:i:s', $all_last_modified) . "<br>";
         $body .= "Total Size: " . $total_size . "<br>";
         $body .= "<table border=\"1\"><tr><td>File</td><td>Modified Time</td><td>Size</td></tr>";
