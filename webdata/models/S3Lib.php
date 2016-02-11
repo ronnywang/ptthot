@@ -29,29 +29,48 @@ class S3Lib
     {
         $s3 = self::getS3Obj();
 
-        if (!preg_match('#s3://([^/]*)/(.*)#', $target, $matches)) {
+        if (!preg_match('#s3://([^/]*)/(.*)$#', $target, $matches)) {
             throw new Exception('must be s3://xxx');
         }
         $bucket = $matches[1];
         $prefix = $matches[2];
 
-        $res = $s3->list_objects($bucket, array('prefix' => $prefix));
-        if (!$res->isOK()) {
-            throw new Exception('error');
-        }
+        $res = $s3->list_objects($bucket, array(
+            'prefix' => $prefix,
+            'delimiter' => '/',
+        ));
 
         $total_size = 0;
         $all_last_modified = 0;
-        
+
+        foreach($res->body->CommonPrefixes as $dir) {
+            $dir = $dir->Prefix;
+            if ($dir == $prefix) {
+                continue;
+            }
+            $ret = self::buildIndex("s3://{$bucket}/{$dir}");
+            $all_last_modified = max($all_last_modified, $ret['last_modified']);
+            $total_size += $ret['total'];
+            $last_modified = $ret['last_modified'];
+            $name = basename(rtrim($dir, '/'));
+            $size = $ret['total'];
+
+            $table_tr[] = "<tr><td><a href=\"" . htmlspecialchars($name) . "\">" . htmlspecialchars($name) . "/</a></td><td>" . date('Y/m/d H:i:s', $last_modified) . "</td><td>{$size}</td></tr>";
+        }
+
         foreach($res->body->Contents as $file) {
-            if ($file->Key == 'index.html') {
+            if (basename($file->Key) == 'index.html') {
+                continue;
+            }
+            if ($file->Key == $prefix) {
                 continue;
             }
             $last_modified = strtotime($file->LastModified);
             $all_last_modified = max($last_modified, $all_last_modified);
             $total_size += $file->Size;
+            $name = basename($file->Key);
 
-            $table_tr[] = "<tr><td><a href=\"" . htmlspecialchars($file->Key) . "\">" . htmlspecialchars($file->Key) . "</a></td><td>" . date('Y/m/d H:i:s', $last_modified) . "</td><td>{$file->Size}</td></tr>";
+            $table_tr[] = "<tr><td><a href=\"" . htmlspecialchars($name) . "\">" . htmlspecialchars($name) . "</a></td><td>" . date('Y/m/d H:i:s', $last_modified) . "</td><td>{$file->Size}</td></tr>";
         }
         $body = '<html><html><meta http-equiv="last-modified" content="' . date('Y-m-d@H:i:s O', $all_last_modified) . '"><body>';
         $body .= "Last Modified: " . date('Y/m/d H:i:s', $all_last_modified) . "<br>";
@@ -72,7 +91,7 @@ class S3Lib
         );
     }
 
-    public function putFile($file, $target)
+    public function putFile($file, $target, $content_type = null)
     {
         $s3 = self::getS3Obj();
         if (!preg_match('#s3://([^/]*)/(.*)#', $target, $matches)) {
@@ -80,10 +99,15 @@ class S3Lib
         }
         $bucket = $matches[1];
         $prefix = $matches[2];
-        $res = $s3->create_object($bucket, $prefix, array(
+
+        $options = array(
             'fileUpload' => $file,
             'acl' => AmazonS3::ACL_PUBLIC,
-            'contentType' => 'text/html',
-        ));
+        );
+        if (!is_null($content_type)) {
+            $options['contentType'] = $content_type;
+        }
+
+        $res = $s3->create_object($bucket, $prefix, $options);
     }
 }
