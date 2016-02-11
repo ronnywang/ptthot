@@ -3,6 +3,7 @@
 include(__DIR__ . '/init.php');
 Pix_Table::$_save_memory = true;
 $last_time = intval(KeyValue::get('snapshot_at'));
+putenv('HTTPS_PROXY=');
 
 // dump count
 while (true) {
