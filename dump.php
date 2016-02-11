@@ -24,7 +24,7 @@ while (true) {
         fwrite($stream, "{$rankdata->board},{$rankdata->time},{$rankdata->count}\n");
     }
     fclose($stream);
-    DropboxLib::putFile($tmp_filename, $filename);
+    S3Lib::putFile($tmp_filename, 's3://ronnywang-ptthot/' . $filename);
     fclose($temp);
 
     KeyValue::set('snapshot_at', $last_time);
@@ -41,5 +41,6 @@ foreach (TitleHistory::search(1)->order(array("board", "title"))->volumemode(100
     fputcsv($stream, array($titlehistory->board, $titlehistory->time, $titlehistory->title));
 }
 fclose($stream);
-DropboxLib::putFile($tmp_filename, $filename);
+S3Lib::putFile($tmp_filename, 's3://ronnywang-ptthot/' . $filename);
+S3Lib::buildIndex('s3://ronnywang-ptthot/');
 fclose($temp);
