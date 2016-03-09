@@ -38,8 +38,8 @@ class IndexController extends Pix_Controller
     public function dumpdataAction()
     {
         $fp = fopen('php://output', 'w');
-        $time = time() - 3 * 86400;
-        foreach (RankData::search("time > $time") as $d) {
+        $time = max(time() - 3 * 86400, intval($_GET['time']));
+        foreach (RankData::search("time > $time")->order('time, count, board') as $d) {
             fputcsv($fp, array($d->board, $d->time, $d->count));
         }
         return $this->noview();
