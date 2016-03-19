@@ -146,9 +146,9 @@ data = <?= json_encode($counts) ?>;
       })
 
       for (var sunday_time = first_sunday; sunday_time <= last_sunday; sunday_time += 86400 * 7) {
-          weekend_left  = x((new Date).setTime(1000 * sunday_time - 86400 * 1000 * 2));
+          weekend_left  = x((new Date).setTime(1000 * sunday_time - 86400 * 1000));
           weekend_left = Math.max(weekend_left, 0);
-          weekend_right = x((new Date).setTime(1000 * sunday_time));
+          weekend_right = x((new Date).setTime(1000 * sunday_time + 86400 * 1000));
           if (weekend_right < 0) {
               continue;
           }
