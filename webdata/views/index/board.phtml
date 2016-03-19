@@ -21,6 +21,8 @@ if ($this->from and $this->to) {
     }
 }
 $this->title = $this->board . ' @ ';
+$first_sunday = strtotime('last sunday 0:0:0', $counts[0][0] / 1000);
+$last_sunday = strtotime('next sunday 0:0:0', $counts[count($counts) - 1][0] / 1000);
 ?>
 <?= $this->partial('/common/header.phtml', $this) ?>
 <style>
@@ -89,7 +91,8 @@ var svg = d3.select("#placeholder").append("svg")
     .attr("height", height + margin.top + margin.bottom)
   .append("g")
     .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-
+    var first_sunday = <?= intval($first_sunday) ?>;
+    var last_sunday = <?= intval($last_sunday) ?>;
 data = <?= json_encode($counts) ?>;
   x.domain(d3.extent(data, function(d) { return d[0]; }));
   y.domain(d3.extent(data, function(d) { return d[1]; }));
@@ -141,7 +144,25 @@ data = <?= json_encode($counts) ?>;
                   }
           });
       })
-          ;
+
+      for (var sunday_time = first_sunday; sunday_time <= last_sunday; sunday_time += 86400 * 7) {
+          weekend_left  = x((new Date).setTime(1000 * sunday_time - 86400 * 1000 * 2));
+          weekend_left = Math.max(weekend_left, 0);
+          weekend_right = x((new Date).setTime(1000 * sunday_time));
+          if (weekend_right < 0) {
+              continue;
+          }
+          weekend_width = weekend_right - weekend_left;
+
+              svg.append('rect').attr({
+                  width: weekend_width,
+                  height: height,
+                  x: Math.max(weekend_left, 0),
+                  y: 0,
+                  opacity: 0.3,
+                  fill: 'rgb(255,0,0',
+              });
+          }
 
 function type(d) {
   d[0] = new Date(d[0]);
