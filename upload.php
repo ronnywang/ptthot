@@ -13,7 +13,7 @@ if (!$content = curl_exec($curl)) {
 }
 
 $content = Big52003::iconv($content);
-$content = preg_replace('/([\x{0fffe}-\x{10ffff}]+)/u','' , $content);
+//$content = preg_replace('/([\x{0fffe}-\x{10ffff}]+)/u','' , $content);
 
 if (!preg_match('#\(本文約每小時更新，最後更新時間 ([^)]*)#', $content, $matches)) {
     throw new Exception('找不到時間');
@@ -32,6 +32,7 @@ $latest_data = array();
 foreach ($matches[0] as $id => $data) {
     try {
         $board = strval($matches[2][$id]);
+        $board = preg_replace('#\|(.*)$#', '', $board);
         $count = intval($matches[1][$id]);
         $name = strval($matches[3][$id]);
 
