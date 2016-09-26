@@ -36,11 +36,13 @@ foreach ($matches[0] as $id => $data) {
         $count = intval($matches[1][$id]);
         $name = strval($matches[3][$id]);
 
-        RankData::insert(array(
-            'time' => $time,
-            'board' => $board,
-            'count' => $count,
-        ));
+        if (RankData::search(array('board' => $board))->max('time')->count != $count) {
+            RankData::insert(array(
+                'time' => $time,
+                'board' => $board,
+                'count' => $count,
+            ));
+        }
     } catch (Pix_Table_DuplicateException $e) {
         RankData::search(array('time' => $time, 'board' => $board))->update(array('count' => $count));
     }
