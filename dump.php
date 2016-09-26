@@ -20,8 +20,13 @@ while (true) {
     $tmp_filename = $meta_data['uri'];
     $stream = gzopen($tmp_filename, 'w');
     fwrite($stream, "#board,timestamp,count\n");
+    $prev_count = null;
     foreach (RankData::search("`time` >= $month_start AND `time` < $month_end")->order(array('board', 'time'))->volumemode(10000) as $rankdata) {
         $last_time = max($last_time, $rankdata->time);
+        if (!is_null($prev_count) and $rankdata->count == $prev_count) {
+            continue;
+        }
+        $prev_count = $rankdata->count;
         fwrite($stream, "{$rankdata->board},{$rankdata->time},{$rankdata->count}\n");
     }
     fclose($stream);
