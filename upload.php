@@ -29,6 +29,7 @@ preg_match_all("#人氣：([0-9]*)\n([^\s]*)\n(.*)#m", ($content), $matches);
 
 $latest_data = array();
 
+$changed = false;
 foreach ($matches[0] as $id => $data) {
     try {
         $board = strval($matches[2][$id]);
@@ -37,6 +38,7 @@ foreach ($matches[0] as $id => $data) {
         $name = strval($matches[3][$id]);
 
         if (RankData::search(array('board' => $board))->max('time')->count != $count) {
+            $changed = true;
             RankData::insert(array(
                 'time' => $time,
                 'board' => $board,
@@ -50,6 +52,8 @@ foreach ($matches[0] as $id => $data) {
     $latest_data[] = array($board, $count, $name);
     TitleHistory::updateTitle($board, $time, $name);
 }
-KeyValue::set('latest_hot', json_encode(array('time' => $time, 'boards' => $latest_data)));
+if ($changed) {
+    KeyValue::set('latest_hot', json_encode(array('time' => $time, 'boards' => $latest_data)));
+}
 
 echo '完成: ' . date('c', $time) . "\n";
