@@ -35,7 +35,7 @@ foreach ($matches[0] as $id => $data) {
         $board = strval($matches[2][$id]);
         $board = preg_replace('#\|(.*)$#', '', $board);
         $count = intval($matches[1][$id]);
-        $name = strval($matches[3][$id]);
+        $name = iconv('UTF-8', 'UTF-8//IGNORE', strval($matches[3][$id]));
 
         if (RankData::search(array('board' => $board))->max('time')->count != $count) {
             $changed = true;
