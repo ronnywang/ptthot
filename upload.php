@@ -37,6 +37,7 @@ foreach ($doc->getElementsByTagName('a') as $a_dom) {
         throw new Exception("4th is not board-title");
     }
     $name = trim($div_doms->item(3)->nodeValue);
+    $name = preg_replace('#^◎#', '', $name);
 
     if (RankData::search(array('board' => $board))->max('time')->count != $count) {
         $changed = true;
