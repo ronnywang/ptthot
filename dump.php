@@ -3,12 +3,18 @@
 include(__DIR__ . '/init.php');
 Pix_Table::$_save_memory = true;
 $last_time = intval(KeyValue::get('snapshot_at'));
+$start_scan_time = time();
 putenv('HTTPS_PROXY=');
 
 // dump count
 while (true) {
     $min_time = RankData::search("`time` > {$last_time}")->min('time')->time;
-    if (!$min_time) {
+    if (!$min_time or $min_time > $start_scan_time) {
+        // 加上檢查 min_time 大於 start_scan_tie 就結束
+        // 是因為現在資料是一分鐘就更新一次，很可能 while 跑一圈後，結果又有新資料了
+        // 結果又有新的 min_time ，這邊就變成好像無窮迴圈
+        // 所以加上 min_time > start_scan_time 的條件
+        // 如果比剛開始跑的新資料就不用管他了
         break;
     }
     $month_start = mktime(0, 0, 0, date('m', $min_time), 1, date('Y', $min_time));
